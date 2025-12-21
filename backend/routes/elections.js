@@ -4,23 +4,10 @@ const Election = require('../models/Election');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Create nodemailer transporter
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT),
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false
-    }
-  });
-};
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Helper function to generate voting URL
 const generateVotingUrl = () => {
@@ -49,18 +36,8 @@ const formatDate = (date) => {
 // Helper function to send email with time information
 const sendVoterCredentials = async (voter, election) => {
   try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.verify();
-    
-    const mailOptions = {
-      from: `"🗳️ E-Voting System" <${process.env.EMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
       to: voter.email,
       subject: `Voting Credentials for: ${election.title}`,
       html: `
@@ -149,11 +126,15 @@ const sendVoterCredentials = async (voter, election) => {
         </body>
         </html>
       `,
-    };
+    });
 
-    const info = await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error(`❌ Failed to send email to ${voter.email}:`, error);
+      throw error;
+    }
+    
     console.log(`✅ Email sent successfully to ${voter.email}`);
-    return Promise.resolve(info);
+    return Promise.resolve(data);
   } catch (error) {
     console.error(`❌ Failed to send email to ${voter.email}:`, error);
     console.log(`
@@ -176,8 +157,6 @@ const sendVoterCredentials = async (voter, election) => {
 // Helper function to send vote confirmation email
 const sendVoteConfirmationEmail = async (voter, election, selectedNominee) => {
   try {
-    const transporter = createTransporter();
-    
     const emailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
         <div style="text-align: center; margin-bottom: 30px;">
@@ -219,18 +198,18 @@ const sendVoteConfirmationEmail = async (voter, election, selectedNominee) => {
       </div>
     `;
 
-    const mailOptions = {
-      from: {
-        name: 'E-Voting System',
-        address: process.env.EMAIL_USER
-      },
+    const { error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
       to: voter.email,
       subject: `✅ Vote Confirmation - ${election.title}`,
       html: emailContent
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Vote confirmation email sent to ${voter.email}`);
+    if (error) {
+      console.error('Error sending vote confirmation email:', error);
+    } else {
+      console.log(`Vote confirmation email sent to ${voter.email}`);
+    }
     
   } catch (error) {
     console.error('Error sending vote confirmation email:', error);

@@ -13,17 +13,17 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchElections();
-    
+
     // Set up timer for real-time updates every second
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
-    
+
     // Auto-refresh elections data every 5 seconds to show voting progress
     const refreshTimer = setInterval(() => {
       fetchElections();
     }, 5000);
-    
+
     return () => {
       clearInterval(timer);
       clearInterval(refreshTimer);
@@ -52,7 +52,7 @@ const Dashboard = () => {
     if (!window.confirm('Are you sure you want to delete this election? This action cannot be undone.')) {
       return;
     }
-    
+
     setDeletingElection(electionId);
     try {
       await electionAPI.deleteElection(electionId);
@@ -68,7 +68,7 @@ const Dashboard = () => {
     if (!window.confirm('Send election results to all voters via email?')) {
       return;
     }
-    
+
     setSendingResults(electionId);
     try {
       await electionAPI.sendResults(electionId);
@@ -89,7 +89,7 @@ const Dashboard = () => {
     if (election.status === 'closed') {
       return { status: 'closed', text: 'Closed', variant: 'secondary' };
     }
-    
+
     if (now < startDate) {
       return { status: 'not-started', text: 'Not Started', variant: 'warning' };
     } else if (now > endDate) {
@@ -104,7 +104,7 @@ const Dashboard = () => {
     const now = currentTime;
     const startDate = new Date(election.startDate);
     const endDate = new Date(election.endDate);
-    
+
     if (now < startDate) {
       const timeUntilStart = startDate - now;
       return formatTimeRemaining(timeUntilStart, 'Starts in');
@@ -147,31 +147,53 @@ const Dashboard = () => {
       hour12: true
     });
   };
+  // Calculate statistics
+  const getStats = () => {
+    const stats = {
+      total: elections.length,
+      active: 0,
+      expired: 0,
+      upcoming: 0
+    };
+
+    elections.forEach(election => {
+      const { status } = getElectionStatus(election);
+      if (status === 'active') stats.active++;
+      else if (status === 'expired' || status === 'closed') stats.expired++;
+      else if (status === 'not-started') stats.upcoming++;
+    });
+
+    return stats;
+  };
+
+  const stats = getStats();
 
   // Professional styling
   const styles = {
     dashboardContainer: {
-      padding: '2rem',
+      padding: '1.25rem',
       minHeight: 'calc(100vh - 80px)',
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       backgroundColor: '#f8fafc',
       color: '#1e293b'
     },
     headerSection: {
-      marginBottom: '2rem',
-      paddingBottom: '1.5rem',
-      borderBottom: '1px solid #e2e8f0'
+      marginBottom: '1.25rem',
+      padding: '1.25rem 2rem',
+      borderRadius: '0.75rem',
+      background: 'rgba(17, 52, 149, 1)',
+      boxShadow: '0 4px 20px rgba(17, 52, 149, 0.3)'
     },
     headerTitle: {
-      color: '#0f172a',
-      fontWeight: '600',
-      fontSize: '1.875rem',
-      marginBottom: '0.5rem',
+      color: '#ffffff',
+      fontWeight: '700',
+      fontSize: '1.5rem',
+      marginBottom: '0.25rem',
       letterSpacing: '-0.025em'
     },
     subtitle: {
-      color: '#64748b',
-      fontSize: '1rem',
+      color: 'rgba(255, 255, 255, 0.75)',
+      fontSize: '0.875rem',
       fontWeight: '400',
       margin: '0'
     },
@@ -260,7 +282,7 @@ const Dashboard = () => {
     electionCardHeader: {
       borderBottom: '1px solid #e2e8f0',
       background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-      padding: '1.5rem 1.5rem',
+      padding: '1rem 1.25rem',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
@@ -276,7 +298,7 @@ const Dashboard = () => {
       flex: '1'
     },
     electionCardBody: {
-      padding: '1.5rem'
+      padding: '1.25rem'
     },
     electionDescription: {
       color: '#64748b',
@@ -317,7 +339,7 @@ const Dashboard = () => {
       marginBottom: '1.5rem'
     },
     statItem: {
-      padding: '1.25rem',
+      padding: '1rem',
       background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
       borderRadius: '0.75rem',
       border: '1px solid #e2e8f0',
@@ -396,6 +418,39 @@ const Dashboard = () => {
       marginTop: '2rem',
       paddingTop: '2rem',
       borderTop: '1px solid #e2e8f0'
+    },
+    statsRow: {
+      marginBottom: '1.5rem',
+      marginTop: '-0.5rem'
+    },
+    statCard: {
+      backgroundColor: '#ffffff',
+      border: '1px solid #e2e8f0',
+      borderRadius: '0.75rem',
+      padding: '1rem',
+      textAlign: 'center',
+      transition: 'all 0.3s ease',
+      height: '100%',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+    },
+    statIcon: {
+      fontSize: '1.25rem',
+      marginBottom: '0.5rem',
+      display: 'block'
+    },
+    statValue: {
+      fontSize: '1.5rem',
+      fontWeight: '700',
+      color: '#0f172a',
+      lineHeight: '1',
+      marginBottom: '0.25rem'
+    },
+    statDesc: {
+      fontSize: '0.75rem',
+      fontWeight: '600',
+      color: '#64748b',
+      textTransform: 'uppercase',
+      letterSpacing: '0.01em'
     }
   };
 
@@ -415,7 +470,7 @@ const Dashboard = () => {
   return (
     <div style={styles.dashboardContainer}>
       {/* Add CSS for hover effects */}
-      <style jsx>{`
+      <style>{`
         .create-btn:hover {
           background-color: #1e40af !important;
           transform: translateY(-1px);
@@ -517,13 +572,13 @@ const Dashboard = () => {
 
       {/* Header Section */}
       <div style={styles.headerSection}>
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h1 style={styles.headerTitle}>Dashboard</h1>
             <p style={styles.subtitle}>Welcome back, {user.name}. Manage your elections and monitor voting activity.</p>
           </div>
-          <Button 
-            variant="outline-primary" 
+          <Button
+            variant="outline-primary"
             size="sm"
             onClick={handleRefresh}
             disabled={loading}
@@ -547,12 +602,44 @@ const Dashboard = () => {
               </>
             ) : (
               <>
-                🔄 Refresh
+                🔄
               </>
             )}
           </Button>
         </div>
       </div>
+
+      {/* Statistics Section */}
+      <Row style={styles.statsRow}>
+        <Col md={3} className="mb-3 mb-md-0">
+          <div style={styles.statCard}>
+            <span style={styles.statIcon}>📊</span>
+            <div style={styles.statValue}>{stats.total}</div>
+            <div style={styles.statDesc}>Total Elections</div>
+          </div>
+        </Col>
+        <Col md={3} className="mb-3 mb-md-0">
+          <div style={styles.statCard}>
+            <span style={styles.statIcon}>🟢</span>
+            <div style={styles.statValue}>{stats.active}</div>
+            <div style={styles.statDesc}>Active</div>
+          </div>
+        </Col>
+        <Col md={3} className="mb-3 mb-md-0">
+          <div style={styles.statCard}>
+            <span style={styles.statIcon}>🔴</span>
+            <div style={styles.statValue}>{stats.expired}</div>
+            <div style={styles.statDesc}>Expired</div>
+          </div>
+        </Col>
+        <Col md={3}>
+          <div style={styles.statCard}>
+            <span style={styles.statIcon}>🟡</span>
+            <div style={styles.statValue}>{stats.upcoming}</div>
+            <div style={styles.statDesc}>Upcoming</div>
+          </div>
+        </Col>
+      </Row>
 
       {error && (
         <Alert variant="danger" style={styles.alertStyle} dismissible onClose={() => setError('')}>
@@ -561,7 +648,7 @@ const Dashboard = () => {
       )}
 
       {elections.length === 0 ? (
-        <Card style={{...styles.emptyStateCard}} className="empty-state-card">
+        <Card style={{ ...styles.emptyStateCard }} className="empty-state-card">
           <Card.Body>
             <div style={styles.emptyIcon}>🗳️</div>
             <h3 style={styles.emptyTitle}>No Elections Created</h3>
@@ -581,19 +668,19 @@ const Dashboard = () => {
               {elections.length} {elections.length === 1 ? 'election' : 'elections'}
             </span>
           </div>
-          
+
           <Row>
             {elections.map((election) => {
               const statusInfo = getElectionStatus(election);
               const timeRemaining = getTimeRemaining(election);
-              
+
               return (
-                <Col lg={6} xl={4} key={election._id} style={{marginBottom: '1.5rem'}}>
+                <Col lg={6} xl={4} key={election._id} style={{ marginBottom: '1.5rem' }}>
                   <Card style={styles.electionCard} className="election-card">
                     <Card.Header style={styles.electionCardHeader}>
                       <h4 style={styles.electionTitle}>{election.title}</h4>
-                      <Badge 
-                        bg={statusInfo.variant} 
+                      <Badge
+                        bg={statusInfo.variant}
                         style={{
                           fontSize: '0.75rem',
                           padding: '0.25rem 0.75rem',
@@ -606,7 +693,7 @@ const Dashboard = () => {
                     </Card.Header>
                     <Card.Body style={styles.electionCardBody}>
                       <p style={styles.electionDescription}>{election.description}</p>
-                      
+
                       {/* Election Schedule Information */}
                       <div style={styles.scheduleInfo}>
                         <div style={styles.scheduleTitle}>📅 Election Schedule</div>
@@ -620,7 +707,7 @@ const Dashboard = () => {
                           ⏰ {timeRemaining}
                         </div>
                       </div>
-                      
+
                       <div style={styles.electionStats}>
                         <div style={styles.statItem} className="stat-item">
                           <span style={styles.statNumber}>{election.nominees.length}</span>
@@ -630,47 +717,47 @@ const Dashboard = () => {
                           <span style={styles.statNumber}>{election.votedCount || 0}/{election.votersCount || 0}</span>
                           <div style={styles.statLabel}>Voted</div>
                           <div style={styles.statSubtext}>
-                            {election.votersCount > 0 
+                            {election.votersCount > 0
                               ? `${Math.round(((election.votedCount || 0) / election.votersCount) * 100)}% turnout`
                               : '0% turnout'
                             }
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Voting Progress Bar */}
-                      <div style={{marginBottom: '1rem'}}>
-                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem'}}>
-                          <span style={{fontSize: '0.75rem', fontWeight: '600', color: '#64748b'}}>
+                      <div style={{ marginBottom: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#64748b' }}>
                             📊 Voting Progress
                           </span>
-                          <span style={{fontSize: '0.75rem', color: '#64748b'}}>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
                             {election.votedCount || 0} of {election.votersCount || 0} votes cast
                           </span>
                         </div>
-                        <ProgressBar 
+                        <ProgressBar
                           now={election.votersCount > 0 ? ((election.votedCount || 0) / election.votersCount) * 100 : 0}
                           variant={
-                            election.votersCount > 0 && ((election.votedCount || 0) / election.votersCount) > 0.7 
-                              ? 'success' 
-                              : ((election.votedCount || 0) / election.votersCount) > 0.3 
-                                ? 'warning' 
+                            election.votersCount > 0 && ((election.votedCount || 0) / election.votersCount) > 0.7
+                              ? 'success'
+                              : ((election.votedCount || 0) / election.votersCount) > 0.3
+                                ? 'warning'
                                 : 'info'
                           }
-                          style={{height: '8px', borderRadius: '4px'}}
+                          style={{ height: '8px', borderRadius: '4px' }}
                         />
                       </div>
-                      
+
                       <div style={styles.electionActions}>
-                        <Button 
-                          variant="outline-primary" 
+                        <Button
+                          variant="outline-primary"
                           size="sm"
-                          style={{...styles.actionBtn, ...styles.copyBtn}}
+                          style={{ ...styles.actionBtn, ...styles.copyBtn }}
                           className="action-btn-copy"
                           onClick={() => {
                             // Ensure we always have the full URL
-                            const fullUrl = election.votingUrl.includes('http') 
-                              ? election.votingUrl 
+                            const fullUrl = election.votingUrl.includes('http')
+                              ? election.votingUrl
                               : `${window.location.origin}/vote/${election.votingUrl}`;
                             navigator.clipboard.writeText(fullUrl);
                             alert('Voting URL copied to clipboard');
@@ -678,46 +765,46 @@ const Dashboard = () => {
                         >
                           Copy Link
                         </Button>
-                        <Button 
+                        <Button
                           href={`/results/${election._id}`}
-                          variant="outline-success" 
+                          variant="outline-success"
                           size="sm"
-                          style={{...styles.actionBtn, ...styles.resultsBtn}}
+                          style={{ ...styles.actionBtn, ...styles.resultsBtn }}
                           className="action-btn-results"
                         >
                           View Results
                         </Button>
-                        {(election.currentStatus === 'expired' || election.status === 'expired' || 
+                        {(election.currentStatus === 'expired' || election.status === 'expired' ||
                           election.currentStatus === 'ended' || election.status === 'ended' ||
                           (election.endDate && new Date(election.endDate) < currentTime)) && (
-                          <Button 
-                            variant="outline-info" 
-                            size="sm"
-                            style={{...styles.actionBtn, ...styles.resultsBtn}}
-                            className="action-btn-send-results"
-                            onClick={() => handleSendResults(election._id)}
-                            disabled={sendingResults === election._id}
-                          >
-                            {sendingResults === election._id ? (
-                              <>
-                                <Spinner
-                                  as="span"
-                                  animation="border"
-                                  size="sm"
-                                  role="status"
-                                  aria-hidden="true"
-                                />
-                                Sending...
-                              </>
-                            ) : (
-                              '📧 Send Results'
-                            )}
-                          </Button>
-                        )}
-                        <Button 
-                          variant="outline-danger" 
+                            <Button
+                              variant="outline-info"
+                              size="sm"
+                              style={{ ...styles.actionBtn, ...styles.resultsBtn }}
+                              className="action-btn-send-results"
+                              onClick={() => handleSendResults(election._id)}
+                              disabled={sendingResults === election._id}
+                            >
+                              {sendingResults === election._id ? (
+                                <>
+                                  <Spinner
+                                    as="span"
+                                    animation="border"
+                                    size="sm"
+                                    role="status"
+                                    aria-hidden="true"
+                                  />
+                                  Sending...
+                                </>
+                              ) : (
+                                '📧 Send Results'
+                              )}
+                            </Button>
+                          )}
+                        <Button
+                          variant="outline-danger"
                           size="sm"
-                          style={{...styles.actionBtn, ...styles.deleteBtn}}
+                          style={{ ...styles.actionBtn, ...styles.deleteBtn }}
                           className="action-btn-delete"
                           onClick={() => handleDeleteElection(election._id)}
                           disabled={deletingElection === election._id}
@@ -744,7 +831,7 @@ const Dashboard = () => {
               );
             })}
           </Row>
-          
+
           <div style={styles.createNewSection}>
             <Button href="/create-election" style={styles.createBtn} className="create-btn">
               Create New Election

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Container, Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -21,7 +22,7 @@ function App() {
     try {
       const storedToken = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
-      
+
       if (storedToken && storedUser) {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
@@ -44,13 +45,23 @@ function App() {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+      <div className="dv-loading-screen">
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <div style={{ marginTop: '1rem', fontWeight: 600, color: 'var(--brand-primary)', fontSize: '0.95rem' }}>
+            Loading DigiVoterz...
+          </div>
         </div>
       </div>
     );
   }
+
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
 
   const AppContent = () => {
     const location = useLocation();
@@ -59,74 +70,97 @@ function App() {
     return (
       <div className="App">
         {!isVotingPage && (
-          <Navbar bg="white" variant="light" expand="lg" className="shadow-sm border-bottom">
+          <Navbar className="dv-navbar" expand="lg">
             <Container fluid className="px-4">
-              {/* Left side - Brand name only */}
-              <Navbar.Brand as={Link} to="/" className="fw-bold fs-3 text-primary">
-                🗳️ DigiVoterz
+              {/* Brand */}
+              <Navbar.Brand as={Link} to="/" className="dv-brand">
+                🗳️ <span className="dv-brand-text">DigiVoterz</span>
               </Navbar.Brand>
-              
-              <Navbar.Toggle aria-controls="basic-navbar-nav" />
-              <Navbar.Collapse id="basic-navbar-nav">
-                {/* Center - Navigation links */}
-                <Nav className="mx-auto">
-                  <Nav.Link as={Link} to="/" className="mx-3 fw-medium text-dark">
+
+              <Navbar.Toggle aria-controls="main-navbar-nav" style={{ border: '1.5px solid var(--border-light)', borderRadius: 'var(--radius-sm)' }} />
+              <Navbar.Collapse id="main-navbar-nav">
+                {/* Center nav links */}
+                <Nav className="mx-auto gap-1">
+                  <Nav.Link
+                    as={Link}
+                    to="/"
+                    className={`dv-nav-link ${location.pathname === '/' ? 'active' : ''}`}
+                  >
                     Home
                   </Nav.Link>
-                  <Nav.Link href="#pricing" className="mx-3 fw-medium text-dark">
+                  <Nav.Link href="#pricing" className="dv-nav-link">
                     Pricing
                   </Nav.Link>
                   {!token && (
                     <>
-                      <Nav.Link href="#reviews" className="mx-3 fw-medium text-dark">
+                      <Nav.Link href="#reviews" className="dv-nav-link">
                         Reviews
                       </Nav.Link>
-                      <Nav.Link href="#support" className="mx-3 fw-medium text-dark">
+                      <Nav.Link href="#support" className="dv-nav-link">
                         Support
                       </Nav.Link>
                     </>
                   )}
                   {token && (
                     <>
-                      <Nav.Link as={Link} to="/create-election" className="mx-3 fw-medium text-dark">
+                      <Nav.Link
+                        as={Link}
+                        to="/create-election"
+                        className={`dv-nav-link ${location.pathname === '/create-election' ? 'active' : ''}`}
+                      >
                         Create Election
                       </Nav.Link>
-                      <Nav.Link as={Link} to="/dashboard" className="mx-3 fw-medium text-dark">
+                      <Nav.Link
+                        as={Link}
+                        to="/dashboard"
+                        className={`dv-nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
+                      >
                         Dashboard
                       </Nav.Link>
                     </>
                   )}
                 </Nav>
-                
-                {/* Right side - Auth buttons/user dropdown */}
-                <Nav className="ms-auto">
+
+                {/* Right - Auth area */}
+                <Nav className="ms-auto align-items-center gap-2">
                   {token ? (
-                    <NavDropdown 
-                      title={<span className="text-dark fw-medium">{user?.name}</span>} 
+                    <NavDropdown
+                      title={
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.92rem' }}>
+                          <span className="dv-user-avatar">{getInitials(user?.name)}</span>
+                          {user?.name}
+                        </span>
+                      }
                       id="user-dropdown"
                       align="end"
                     >
+                      <NavDropdown.Item
+                        as={Link}
+                        to="/dashboard"
+                        style={{ fontSize: '0.9rem' }}
+                      >
+                        Dashboard
+                      </NavDropdown.Item>
+                      <NavDropdown.Divider />
                       <NavDropdown.Item onClick={handleLogout}>
                         Logout
                       </NavDropdown.Item>
                     </NavDropdown>
                   ) : (
                     <>
-                      <Nav.Link 
-                        as={Link} 
+                      <Nav.Link
+                        as={Link}
                         to="/login"
-                        className="btn btn-outline-primary btn-sm me-2"
-                        style={{ textDecoration: 'none' }}
+                        className="dv-btn-login"
                       >
                         Login
                       </Nav.Link>
-                      <Nav.Link 
-                        as={Link} 
+                      <Nav.Link
+                        as={Link}
                         to="/register"
-                        className="btn btn-primary btn-sm"
-                        style={{ textDecoration: 'none' }}
+                        className="dv-btn-register"
                       >
-                        Register
+                        Get Started
                       </Nav.Link>
                     </>
                   )}
@@ -138,21 +172,21 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route 
-            path="/login" 
-            element={token ? <Navigate to="/dashboard" /> : <Login setToken={setToken} setUser={setUser} />} 
+          <Route
+            path="/login"
+            element={token ? <Navigate to="/dashboard" /> : <Login setToken={setToken} setUser={setUser} />}
           />
-          <Route 
-            path="/register" 
-            element={token ? <Navigate to="/dashboard" /> : <Register />} 
+          <Route
+            path="/register"
+            element={token ? <Navigate to="/dashboard" /> : <Register />}
           />
-          <Route 
-            path="/dashboard" 
-            element={token ? <Dashboard /> : <Navigate to="/login" />} 
+          <Route
+            path="/dashboard"
+            element={token ? <Dashboard /> : <Navigate to="/login" />}
           />
-          <Route 
-            path="/create-election" 
-            element={token ? <CreateElection /> : <Navigate to="/login" />} 
+          <Route
+            path="/create-election"
+            element={token ? <CreateElection /> : <Navigate to="/login" />}
           />
           <Route path="/vote/:votingUrl" element={<VotingPage />} />
           <Route path="/results/:electionId" element={<ResultsPage />} />
@@ -165,62 +199,6 @@ function App() {
   return (
     <Router>
       <AppContent />
-
-      <style jsx>{`
-        .navbar {
-          background-color: white !important;
-        }
-        
-        .navbar-nav .nav-link {
-          transition: color 0.3s ease, transform 0.2s ease;
-          color: #333 !important;
-        }
-        
-        .navbar-nav .nav-link:hover {
-          color: #0d6efd !important;
-          transform: translateY(-2px);
-        }
-        
-        .btn-outline-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
-        }
-        
-        .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(13, 110, 253, 0.4);
-        }
-        
-        .navbar-brand:hover {
-          transform: scale(1.05);
-          transition: transform 0.2s ease;
-        }
-        
-        .dropdown-toggle::after {
-          margin-left: 0.5rem;
-        }
-        
-        .dropdown-menu {
-          border: 1px solid #e0e0e0;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .dropdown-item:hover {
-          background-color: #f8f9fa;
-          color: #dc3545;
-        }
-        
-        @media (max-width: 991px) {
-          .navbar-nav {
-            text-align: center;
-            margin: 1rem 0;
-          }
-          
-          .navbar-nav .nav-link {
-            padding: 0.5rem 1rem;
-          }
-        }
-      `}</style>
     </Router>
   );
 }

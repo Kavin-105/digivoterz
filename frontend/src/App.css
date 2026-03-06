@@ -1,38 +1,159 @@
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background-color: var(--surface-bg);
+}
+
+/* ─── Navbar ────────────────────────────────────────────────────────────── */
+.dv-navbar {
+  background: #f1f3f6 !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #dde1e7 !important;
+  box-shadow: 0 2px 12px rgba(67, 97, 238, 0.08) !important;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  padding: 0.6rem 0;
+}
+
+.dv-brand {
+  font-weight: 800 !important;
+  font-size: 1.35rem !important;
+  color: var(--brand-primary) !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: -0.5px;
+}
+
+.dv-brand-text {
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: var(--brand-primary);
+  letter-spacing: -0.5px;
+}
+
+.dv-nav-link {
+  font-weight: 500 !important;
+  color: var(--text-secondary) !important;
+  padding: 0.45rem 0.9rem !important;
+  border-radius: var(--radius-sm) !important;
+  transition: all 0.2s ease !important;
+  position: relative;
+  text-decoration: none !important;
+}
+
+.dv-nav-link:hover {
+  color: var(--brand-primary) !important;
+  background: #e2e6ed !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.12);
+}
+
+.dv-nav-link.active {
+  color: var(--brand-primary) !important;
+  background: rgba(67, 97, 238, 0.1) !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+}
+
+.dv-btn-login,
+a.dv-btn-login,
+.nav-link.dv-btn-login {
+  font-weight: 600 !important;
+  border: 1.5px solid var(--brand-primary) !important;
+  color: var(--brand-primary) !important;
+  border-radius: 50px !important;
+  padding: 0.4rem 1.2rem !important;
+  background: transparent !important;
+  transition: all var(--transition) !important;
+  text-decoration: none !important;
+  font-size: 0.88rem !important;
+}
+
+.dv-btn-login:hover,
+a.dv-btn-login:hover,
+.nav-link.dv-btn-login:hover {
+  background: var(--surface-hover) !important;
+  color: var(--brand-primary) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.15);
+}
+
+.dv-btn-register,
+a.dv-btn-register,
+.nav-link.dv-btn-register {
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+  padding: 0.4rem 1.2rem !important;
+  background: linear-gradient(135deg, #4361ee, #3a0ca3) !important;
+  border: none !important;
+  color: #ffffff !important;
+  transition: all var(--transition) !important;
+  text-decoration: none !important;
+  font-size: 0.88rem !important;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3) !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.dv-btn-register:hover,
+a.dv-btn-register:hover,
+.nav-link.dv-btn-register:hover {
+  opacity: 0.92;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(67, 97, 238, 0.4) !important;
+}
+
+.dv-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin-right: 8px;
 }
 
-.App-link {
-  color: #61dafb;
+/* ─── Loading Spinner ───────────────────────────────────────────────────── */
+.dv-loading-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-bg);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.dv-loading-screen .spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 3px;
+  color: var(--brand-primary) !important;
+}
+
+/* ─── Dropdown ──────────────────────────────────────────────────────────── */
+.dropdown-menu {
+  border: 1px solid var(--border-light) !important;
+  box-shadow: var(--shadow-md) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.5rem !important;
+}
+
+.dropdown-item {
+  border-radius: var(--radius-sm) !important;
+  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+  transition: all var(--transition) !important;
+  color: var(--text-secondary) !important;
+}
+
+.dropdown-item:hover {
+  background: rgba(220, 53, 69, 0.06) !important;
+  color: #dc3545 !important;
 }

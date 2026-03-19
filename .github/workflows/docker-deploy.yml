@@ -34,14 +34,25 @@ jobs:
         run: |
           echo "CHANGED_FRONTEND=false" >> $GITHUB_ENV
           echo "CHANGED_BACKEND=false" >> $GITHUB_ENV
-          git fetch origin develop --depth=1
-          CHANGED_FILES=$(git diff --name-only ${{ github.sha }} ${{ github.sha }}^)
-          echo "Changed files: $CHANGED_FILES"
+
+          # Ensure full history to avoid shallow checkout issues
+          git fetch origin develop --prune --unshallow || true
+
+          # Find changed files compared to the previous commit on develop
+          CHANGED_FILES=$(git diff --name-only origin/develop~1..origin/develop)
+          echo "Changed files detected:"
+          echo "$CHANGED_FILES"
+
+          # Check if any frontend files changed
           if echo "$CHANGED_FILES" | grep -q '^frontend/'; then
             echo "CHANGED_FRONTEND=true" >> $GITHUB_ENV
+            echo "Frontend changes detected."
           fi
+
+          # Check if any backend files changed
           if echo "$CHANGED_FILES" | grep -q '^backend/'; then
             echo "CHANGED_BACKEND=true" >> $GITHUB_ENV
+            echo "Backend changes detected."
           fi
 
       # Step 5: Build & push frontend if changed

@@ -63,7 +63,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: kavin105/digivoterz-frontend:v3
+          tags: kavin105/digivoterz-frontend:v2
 
       # Step 6: Build & push backend if changed
       - name: Build & Push Backend

@@ -73,4 +73,4 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: kavin105/digivoterz-backend:v3
+          tags: kavin105/digivoterz-backend:v2

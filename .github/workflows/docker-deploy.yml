@@ -1,8 +1,10 @@
 name: Build & Push Docker Images (Develop)
 
-# Trigger workflow only on develop branch
 on:
   push:
+    branches:
+      - develop
+  pull_request:
     branches:
       - develop
 
@@ -11,39 +13,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout the repo
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # Step 2: Set up Docker Buildx (for multi-platform builds, optional)
+      # Step 2: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 3: Log in to Docker Hub
+      # Step 3: Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 4: Build and push frontend image
+      # Step 4: Determine changed folders
+      - name: Determine changed folders
+        id: changes
+        run: |
+          echo "CHANGED_FRONTEND=false" >> $GITHUB_ENV
+          echo "CHANGED_BACKEND=false" >> $GITHUB_ENV
+          git fetch origin develop --depth=1
+          CHANGED_FILES=$(git diff --name-only ${{ github.sha }} ${{ github.sha }}^)
+          echo "Changed files: $CHANGED_FILES"
+          if echo "$CHANGED_FILES" | grep -q '^frontend/'; then
+            echo "CHANGED_FRONTEND=true" >> $GITHUB_ENV
+          fi
+          if echo "$CHANGED_FILES" | grep -q '^backend/'; then
+            echo "CHANGED_BACKEND=true" >> $GITHUB_ENV
+          fi
+
+      # Step 5: Build & push frontend if changed
       - name: Build & Push Frontend
+        if: env.CHANGED_FRONTEND == 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: |
-            kavin105/digivoterz-frontend:develop
-            kavin105/digivoterz-frontend:v2
+          tags: kavin105/digivoterz-frontend:v3
 
-      # Step 5: Build and push backend image
+      # Step 6: Build & push backend if changed
       - name: Build & Push Backend
+        if: env.CHANGED_BACKEND == 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: |
-            kavin105/digivoterz-backend:develop
-            kavin105/digivoterz-backend:v2
+          tags: kavin105/digivoterz-backend:v3

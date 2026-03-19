@@ -34,8 +34,8 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: |
-            yourusername/digivoterz-frontend:develop
-            yourusername/digivoterz-frontend:v2
+            kavin105/digivoterz-frontend:develop
+            kavin105/digivoterz-frontend:v2
 
       # Step 5: Build and push backend image
       - name: Build & Push Backend
@@ -45,5 +45,5 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: |
-            yourusername/digivoterz-backend:develop
-            yourusername/digivoterz-backend:v2
+            kavin105/digivoterz-backend:develop
+            kavin105/digivoterz-backend:v2

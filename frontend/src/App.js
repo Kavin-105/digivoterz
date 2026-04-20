@@ -74,7 +74,7 @@ function App() {
             <Container fluid className="px-4">
               {/* Brand */}
               <Navbar.Brand as={Link} to="/" className="dv-brand">
-                🗳️ <span className="dv-brand-text">DigiVoterz</span>
+                🗳️ <span className="dv-brand-text">DigiVoterzz</span>
               </Navbar.Brand>
 
               <Navbar.Toggle aria-controls="main-navbar-nav" style={{ border: '1.5px solid var(--border-light)', borderRadius: 'var(--radius-sm)' }} />

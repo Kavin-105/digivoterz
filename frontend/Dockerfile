@@ -12,6 +12,10 @@ RUN npm install --legacy-peer-deps
 # Copy the rest of the frontend source code
 COPY . .
 
+# 👇 ADD THESE TWO LINES
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 # Build the React application for production
 RUN npm run build
 

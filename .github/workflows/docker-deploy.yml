@@ -74,3 +74,37 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: kavin105/digivoterz-backend:latest
+          
+      # Step 7: Deploy to EC2 (only if something changed)
+      - name: Deploy to EC2
+        if: env.CHANGED_FRONTEND == 'true' || env.CHANGED_BACKEND == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Pulling latest images..."
+            docker pull kavin105/digivoterz-backend:latest
+            docker pull kavin105/digivoterz-frontend:latest
+
+            echo "Stopping old containers..."
+            docker stop backend frontend || true
+            docker rm backend frontend || true
+
+            echo "Starting backend..."
+            docker run -d \
+              --name backend \
+              --network evoting-net \
+              -p 5000:5000 \
+              -e MONGODB_URI=mongodb://mongodb:27017/voting-system \
+              kavin105/digivoterz-backend:latest
+
+            echo "Starting frontend..."
+            docker run -d \
+              --name frontend \
+              --network evoting-net \
+              -p 3000:3000 \
+              kavin105/digivoterz-frontend:latest
+
+            echo "Deployment completed!"

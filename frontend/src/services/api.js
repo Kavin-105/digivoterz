@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://backend:5000/api';
-const API_BASE_URL = 'http://100.54.191.192:5000/api';
+const API_BASE_URL = 'http://3.209.198.205:5000/api';
 
 // Create axios instance
 const api = axios.create({
